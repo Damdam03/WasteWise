@@ -1,5 +1,5 @@
 <template>
-  <div class="relative min-h-screen flex items-center justify-center bg-cover bg-center" style="background-image: url('/src/assets/images/bg-campus.jpg');">
+  <div class="relative min-h-screen flex items-center justify-center bg-cover bg-center" :style="{ backgroundImage: `url(${bgImage})` }">
     <!-- Overlay -->
     <div class="absolute inset-0 bg-black bg-opacity-60"></div>
 
@@ -20,8 +20,15 @@
 </template>
 
 <script>
+import bgImage from '@/assets/images/bg-campus.jpg';
+
 export default {
   name: "LandingPage",
+  data() {
+    return {
+      bgImage
+    };
+  },
   methods: {
     goToDashboard() {
       this.$router.push({ name: 'dashboard' });
