@@ -253,7 +253,7 @@
                     <div class="font-semibold">Snapshot {{ i + 1 }}</div>
                     <div class="text-xs text-gray-500">ID: {{ h.key }}</div>
                   </div>
-                  <div class="text-right text-xs text-gray-500">{{ h.timestamp ? new Date(h.timestamp * 1000).toLocaleString() : 'No timestamp' }}</div>
+                  <div class="text-right text-xs text-gray-500">{{ h.timestamp ? new Date(h.timestamp).toLocaleString() : 'No timestamp' }}</div>
                 </div>
                 <div class="mt-2 text-sm text-gray-800">
                   <div>distance: {{ h.distance !== undefined ? h.distance : 'N/A' }}</div>
