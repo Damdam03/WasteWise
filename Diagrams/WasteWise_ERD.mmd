@@ -1,0 +1,32 @@
+erDiagram
+  BIN {
+    string id PK "Bin ID (Primary Key)"
+    string location
+    int floor
+    string personnel FK "Assigned Personnel"
+    boolean connected
+    datetime lastSeen
+  }
+  SENSOR_DATA {
+    string id PK "Sensor Data ID"
+    string bin_id FK "Bin ID"
+    datetime timestamp
+    float distance_cm
+    float fillPercentage
+    string extra
+  }
+  PERSONNEL {
+    string id PK "Personnel ID"
+    string name
+  }
+
+  CONNECTION_PING {
+    string id PK "Connection Ping ID"
+    string bin_id FK "Bin ID"
+    datetime timestamp
+    boolean connected
+  }
+
+  BIN ||--o{ SENSOR_DATA : "has"
+  PERSONNEL ||--o{ BIN : "assigned to"
+  BIN ||--o{ CONNECTION_PING : "has"

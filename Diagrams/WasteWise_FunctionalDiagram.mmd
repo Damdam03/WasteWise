@@ -1,0 +1,18 @@
+graph LR
+  User["User (Staff/Admin)"]
+  Device["ESP32 IoT Device"]
+  UI["User Interface"]
+  BinManager["Bin Management Module"]
+  Dashboard["Dashboard Module"]
+  HistoryViewer["Bin History Module"]
+  FirebaseDB["Firebase Realtime Database"]
+
+  User --> UI
+  UI --> BinManager
+  UI --> Dashboard
+  UI --> HistoryViewer
+  Device --> FirebaseDB
+  BinManager --> FirebaseDB
+  Dashboard --> FirebaseDB
+  HistoryViewer --> FirebaseDB
+  FirebaseDB --> UI

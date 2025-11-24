@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WasteWise System Diagrams Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({startOnLoad:true});</script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f9f9f9;
+    }
+    h2 {
+      color: #2c3e50;
+    }
+    .diagram-container {
+      background: white;
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin-bottom: 40px;
+      border-radius: 8px;
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <h1>WasteWise System Diagrams</h1>
+
+  <div class="diagram-container">
+    <h2>Functional Diagram</h2>
+    <div class="mermaid">
+graph LR
+  User[User (Staff/Admin)]
+  Device[ESP32 IoT Device]
+  UI[User Interface]
+  BinManager[Bin Management Module]
+  Dashboard[Dashboard Module]
+  HistoryViewer[Bin History Module]
+  FirebaseDB[Firebase Realtime Database]
+
+  User --> UI
+  UI --> BinManager
+  UI --> Dashboard
+  UI --> HistoryViewer
+  Device --> FirebaseDB
+  BinManager --> FirebaseDB
+  Dashboard --> FirebaseDB
+  HistoryViewer --> FirebaseDB
+  FirebaseDB --> UI
+    </div>
+  </div>
+
+  <div class="diagram-container">
+    <h2>Use Case Diagram</h2>
+    <div class="mermaid">
+usecaseDiagram
+  actor User as "User (Staff/Admin)"
+  actor Device as "ESP32 Device"
+
+  User --> (Add Bin)
+  User --> (Edit Bin)
+  User --> (Delete Bin)
+  User --> (View Dashboard)
+  User --> (View Bin History)
+
+  Device --> (Auto-Create Bin)
+  Device --> (Send Sensor Data)
+    </div>
+  </div>
+
+  <div class="diagram-container">
+    <h2>Swimlane Diagram (Add/Edit/Monitor)</h2>
+    <div class="mermaid">
+sequenceDiagram
+  participant User
+  participant UI
+  participant System
+  participant Firebase
+  participant Device
+
+  rect rgb(210, 245, 255)
+  Note over User, UI: Add Bin Workflow
+  User->>UI: Click "Add Bin"
+  UI->>User: Show Add Bin Modal
+  User->>UI: Fill bin details & submit
+  UI->>System: Validate & process new bin
+  System->>Firebase: push new bin data
+  Firebase-->>System: Confirm bin added
+  System->>UI: Close modal & refresh bins list
+  end
+
+  rect rgb(245, 210, 210)
+  Note over User, UI: Edit Bin Workflow
+  User->>UI: Select "Edit Bin" for a bin
+  UI->>User: Show Edit Bin Modal with current details
+  User->>UI: Modify details & save
+  UI->>System: Validate & update bin data
+  System->>Firebase: update bin data
+  Firebase-->>System: Confirm bin updated
+  System->>UI: Close modal & refresh bins list
+  end
+
+  rect rgb(210, 255, 210)
+  Note over Device, Firebase, UI, User: Monitor Bins with Alerts
+  Device->>Firebase: Send sensor data with fill % and status
+  Firebase->>System: Update bin status
+  System->>UI: Push updated status & fill %
+  UI->>User: Show updated dashboard and alerts (e.g., full bins)
+  end
+    </div>
+  </div>
+
+  <div class="diagram-container">
+    <h2>Entity Relationship Diagram (ERD)</h2>
+    <div class="mermaid">
+erDiagram
+  BIN {
+    string id PK "Bin ID (Primary Key)"
+    string location
+    int floor
+    string personnel FK "Assigned Personnel"
+    boolean connected
+    datetime lastSeen
+  }
+  SENSOR_DATA {
+    string id PK "Sensor Data ID"
+    string bin_id FK "Bin ID"
+    datetime timestamp
+    float distance_cm
+    float fillPercentage
+    string extra
+  }
+  PERSONNEL {
+    string id PK "Personnel ID"
+    string name
+  }
+
+  BIN ||--o{ SENSOR_DATA : "has"
+  PERSONNEL ||--o{ BIN : "assigned to"
+    </div>
+  </div>
+</body>
+</html>

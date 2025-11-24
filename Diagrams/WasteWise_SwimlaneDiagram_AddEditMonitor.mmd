@@ -1,0 +1,33 @@
+sequenceDiagram
+    participant User
+    participant System
+    participant Device
+
+    Note over User,System,Device: Start of Bin Management Workflow
+
+    rect rgb(210, 245, 255)
+    Note over User,System: Add Bin Workflow
+    User->>System: Click "Add Bin"
+    System->>User: Show Add Bin Modal
+    User->>System: Submit Bin Details
+    System->>System: Validate and Process Add
+    System->>User: Confirm Bin Added and Refresh List
+    end
+
+    rect rgb(245, 210, 210)
+    Note over User,System: Edit Bin Workflow
+    User->>System: Select Bin to Edit
+    System->>User: Show Edit Bin Modal with Current Details
+    User->>System: Modify and Submit Changes
+    System->>System: Validate and Update Bin Data
+    System->>User: Confirm Bin Updated and Refresh List
+    end
+
+    rect rgb(210, 255, 210)
+    Note over Device,System: Bin Monitoring Workflow
+    Device->>System: Send Sensor Data
+    System->>System: Process Sensor Data and Update Status
+    System->>User: Push Updates and Alerts (Full Bin Notifications)
+    end
+
+    Note over User,System,Device: End of Bin Management Workflow

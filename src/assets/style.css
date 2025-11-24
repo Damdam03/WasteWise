@@ -1,0 +1,157 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --blue: #114fee;
+  --outline-color: #507df2;
+  --black: #000000;
+  --gray-1: #6a6a6a;
+  --gray-2: #5f6368;
+  --gray-3: #f2f2f2;
+  --white: #ffffff;
+  --border-gray: #dcdcdc;
+  --bg-gray: #fafafa;
+  --button-input-border-radius: 50px;
+}
+body {
+  background-color: var(--bg-white);
+}
+* {
+  outline-color: var(--outline-color);
+}
+button.btn-normal {
+  background-color: var(--blue);
+  color: var(--white);
+  border: solid 2px var(--blue);
+  @apply flex justify-center items-center;
+}
+button.btn-normal .input-icon{
+  @apply animate-spin ml-2 text-white;
+}
+button.btn-border {
+  background-color: transparent;
+  color: var(--blue);
+  border: solid 2px var(--blue);
+  @apply flex justify-center items-center;
+}
+button.btn-text {
+  color: var(--blue);
+  @apply font-medium pl-4 pr-4;
+}
+button:disabled,
+input:disabled,
+select:disabled{
+  opacity: 0.6;
+}
+button,
+input,
+.input-container select {
+  border-radius: var(--button-input-border-radius);
+  min-width: 8rem;
+  padding: 4px;
+}
+.input-container {
+  @apply flex flex-col max-w-72;
+}
+.input-container label {
+  color: var(--gray-1);
+  @apply font-medium flex justify-between items-center;
+}
+.input-container-inner {
+  @apply relative mt-1;
+}
+.input-container input,
+.input-container select {
+  background-color: var(--gray-3);
+  @apply pl-12 pr-4 py-2 w-full;
+}
+/*.input-container-dropdown select{
+  border-radius: 20px;
+  @apply w-full;
+}*/
+.input-icon,
+.input-icon-right {
+  @apply text-gray-400;
+}
+.main-search-bar {
+  @apply relative w-full md:w-1/2;
+}
+.notice-error,
+.notice-warning,
+.notice-success{
+  @apply w-full mt-4 p-2 rounded text-center;
+}
+.notice-error{
+  @apply bg-red-100 text-red-700;
+}
+.main-search-bar span,
+.input-container span {
+  @apply absolute inset-y-0 left-0 flex items-center pl-5;
+}
+div.input-container-inner > span.right-icon{
+  @apply pr-5 right-5 inset-y-0;
+}
+.main-search-bar input {
+  @apply pl-12 pr-4 py-2 shadow w-full;
+  border-radius: var(--button-input-border-radius);
+  border: solid 1px var(--border-gray);
+}
+.app-header {
+  @apply flex justify-between items-center p-4 bg-white sticky top-0 w-full z-50;
+}
+.app-header-left-container img {
+  @apply w-auto;
+}
+.app-header-middle-container {
+  @apply w-3/5 px-4 flex items-center justify-center flex-grow;
+}
+.app-header-right-container {
+  @apply w-1/5 flex justify-end space-x-5;
+}
+.app-footer {
+  border-top: solid 1px var(--border-gray);
+  @apply w-full font-medium text-center flex justify-start space-x-4 space-x-4 p-4;
+}
+.app-footer p {
+  color: var(--gray-1);
+  @apply font-normal;
+}
+.main-content {
+  @apply flex-grow;
+}
+.headline {
+  color: var(--black);
+  font-size: xxx-large;
+}
+.sub-headline,
+.sub-headline-2 {
+  color: var(--gray-2);
+  font-size: x-large;
+  @apply mt-2;
+}
+.sub-headline-2 {
+  @apply text-lg m-0;
+}
+.card-view {
+  @apply max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-56 border-2 border-gray-200 p-4;
+}
+.card-view img {
+  @apply w-full object-cover rounded;
+}
+.card-title {
+  @apply text-black leading-tight font-semibold tracking-wide;
+}
+.card-author,
+.card-date {
+  @apply text-black tracking-wide text-xs text-gray-500 mt-3;
+}
+.card-date {
+  @apply mt-0;
+}
+.card-footer {
+  @apply flex text-xs text-gray-500 mt-3 items-center justify-end space-x-2;
+}
+.card-footer p {
+  @apply flex items-center space-x-1;
+}

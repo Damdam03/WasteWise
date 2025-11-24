@@ -1,0 +1,196 @@
+{
+  "bins": {
+    "BIN-001": {
+      "connected": true,
+      "floor": 1,
+      "lastSeen": 1763969333,
+      "location": "IIT Building",
+      "personnel": "Oscar M. Navarra Jr.",
+      "sensorData": {
+        "132135346616224": {
+          "deviceId": "ESP32_132135346616224",
+          "distance": 17.14,
+          "fillPercentage": 0,
+          "status": "empty",
+          "timestamp": 824183
+        }
+      },
+      "status": "empty"
+    },
+    "BIN-002": {
+      "connected": true,
+      "floor": 1,
+      "lastSeen": 1763969306,
+      "location": "Registrar Building",
+      "personnel": "Ronald O. Cea",
+      "sensorData": {
+        "233820234674176": {
+          "deviceId": "ESP32_233820234674176",
+          "distance": 47.83,
+          "fillPercentage": 0,
+          "status": "empty",
+          "timestamp": 753639
+        }
+      },
+      "status": "empty"
+    },
+    "BIN-003": {
+      "connected": true,
+      "floor": 1,
+      "lastSeen": 1763969330,
+      "location": "Gymnasium",
+      "personnel": "Jonel S. Correa",
+      "sensorData": {
+        "212173582725120": {
+          "deviceId": "ESP32_212173582725120",
+          "distance": 47.83,
+          "fillPercentage": 0,
+          "status": "empty",
+          "timestamp": 934842
+        }
+      },
+      "status": "empty"
+    }
+  },
+  "connectionPing": {
+    "esp32_rest_132135346616224": {
+      "ts": "2"
+    },
+    "esp32_rest_212173582725120": {
+      "ts": "16"
+    },
+    "esp32_rest_233820234674176": {
+      "ts": "12"
+    }
+  },
+  "connectionTest": {
+    "1763009959544": {
+      "status": "test",
+      "timestamp": "2025-11-13T04:59:19.544Z"
+    },
+    "1763010010818": {
+      "status": "test",
+      "timestamp": "2025-11-13T05:00:10.818Z"
+    },
+    "1763010053662": {
+      "status": "test",
+      "timestamp": "2025-11-13T05:00:53.662Z"
+    },
+    "1763010332361": {
+      "status": "test",
+      "timestamp": "2025-11-13T05:05:32.361Z"
+    },
+    "1763010748627": {
+      "status": "test",
+      "timestamp": "2025-11-13T05:12:28.627Z"
+    },
+    "1763010752761": {
+      "status": "test",
+      "timestamp": "2025-11-13T05:12:32.761Z"
+    },
+    "1763339064532": {
+      "status": "test",
+      "timestamp": "2025-11-17T00:24:24.533Z"
+    },
+    "1763339366417": {
+      "status": "test",
+      "timestamp": "2025-11-17T00:29:26.417Z"
+    },
+    "1763340858378": {
+      "status": "test",
+      "timestamp": "2025-11-17T00:54:18.378Z"
+    },
+    "1763342967960": {
+      "status": "test",
+      "timestamp": "2025-11-17T01:29:27.960Z"
+    },
+    "1763348003839": {
+      "status": "test",
+      "timestamp": "2025-11-17T02:53:23.839Z"
+    },
+    "1763348040615": {
+      "status": "test",
+      "timestamp": "2025-11-17T02:54:00.615Z"
+    },
+    "1763357146831": {
+      "status": "test",
+      "timestamp": "2025-11-17T05:25:46.831Z"
+    },
+    "1763496544194": {
+      "status": "test",
+      "timestamp": "2025-11-18T20:09:04.194Z"
+    },
+    "1763496857779": {
+      "status": "test",
+      "timestamp": "2025-11-18T20:14:17.779Z"
+    },
+    "1763498256657": {
+      "status": "test",
+      "timestamp": "2025-11-18T20:37:36.657Z"
+    },
+    "1763498355850": {
+      "status": "test",
+      "timestamp": "2025-11-18T20:39:15.850Z"
+    },
+    "1763503080472": {
+      "status": "test",
+      "timestamp": "2025-11-18T21:58:00.472Z"
+    },
+    "1763572671884": {
+      "status": "test",
+      "timestamp": "2025-11-19T17:17:51.884Z"
+    },
+    "1763574309131": {
+      "status": "test",
+      "timestamp": "2025-11-19T17:45:09.131Z"
+    },
+    "1763575684209": {
+      "status": "test",
+      "timestamp": "2025-11-19T18:08:04.209Z"
+    },
+    "1763575865076": {
+      "status": "test",
+      "timestamp": "2025-11-19T18:11:05.076Z"
+    },
+    "1763575879607": {
+      "status": "test",
+      "timestamp": "2025-11-19T18:11:19.607Z"
+    },
+    "1763575888939": {
+      "status": "test",
+      "timestamp": "2025-11-19T18:11:28.939Z"
+    },
+    "1763575989666": {
+      "status": "test",
+      "timestamp": "2025-11-19T18:13:09.666Z"
+    },
+    "1763576226005": {
+      "status": "test",
+      "timestamp": "2025-11-19T18:17:06.005Z"
+    },
+    "1763606347216": {
+      "status": "test",
+      "timestamp": "2025-11-20T02:39:07.216Z"
+    },
+    "1763606574098": {
+      "status": "test",
+      "timestamp": "2025-11-20T02:42:54.098Z"
+    },
+    "1763716795744": {
+      "status": "test",
+      "timestamp": "2025-11-21T09:19:55.744Z"
+    },
+    "1763716798890": {
+      "status": "test",
+      "timestamp": "2025-11-21T09:19:58.890Z"
+    },
+    "1763917088690": {
+      "status": "test",
+      "timestamp": "2025-11-23T16:58:08.690Z"
+    },
+    "1763969136273": {
+      "status": "test",
+      "timestamp": "2025-11-24T07:25:36.273Z"
+    }
+  }
+}

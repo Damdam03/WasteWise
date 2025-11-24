@@ -1,0 +1,13 @@
+graph TD
+  User[User (Staff/Admin)]
+  Device[ESP32 Device]
+  System[WasteWise System]
+
+  User -->|Add Bin| System
+  User -->|Edit Bin| System
+  User -->|Delete Bin| System
+  User -->|View Dashboard| System
+  User -->|View Bin History| System
+
+  Device -->|Auto-Create Bin| System
+  Device -->|Send Sensor Data| System
