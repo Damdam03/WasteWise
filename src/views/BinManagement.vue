@@ -613,4 +613,3 @@ table {
   border-collapse: collapse;
 }
 </style>
-  
