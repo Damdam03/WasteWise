@@ -187,7 +187,7 @@
 
 <script>
 import { db } from '@/services/firebase';
-import { ref as dbRef, onValue, off } from 'firebase/database';
+import { ref as dbRef, onValue, off, get, set } from 'firebase/database';
 
 export default {
   name: 'BinHistory',
@@ -333,6 +333,26 @@ export default {
                     if (n >= 1e12) ts = n; // ms
                     else if (n >= 1e9) ts = n * 1000; // s -> ms
                     else ts = n; // counter
+                  }
+                  // Archive snapshot into central history path if not already stored
+                  try {
+                    const historyRef = dbRef(db, `binHistory/${key}/${snapKey}`);
+                    // check existence then write if missing
+                    get(historyRef).then((hSnap) => {
+                      if (!hSnap.exists()) {
+                        const payload = Object.assign({}, snap, { timestamp: ts, archivedAt: Date.now() });
+                        set(historyRef, payload).catch((err) => {
+                          // log but do not break UI
+                          // eslint-disable-next-line no-console
+                          console.warn('[BinHistory] failed to archive snapshot', key, snapKey, err && err.message);
+                        });
+                      }
+                    }).catch((err) => {
+                      // eslint-disable-next-line no-console
+                      console.warn('[BinHistory] failed to check archive existence', err && err.message);
+                    });
+                  } catch (e) {
+                    // ignore archival errors
                   }
                   entries.push({
                     binId: key,
