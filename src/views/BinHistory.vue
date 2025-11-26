@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 relative">
     <!-- Header -->
     <div class="bg-white border-b border-gray-200 shadow-sm">
@@ -239,17 +239,29 @@ export default {
       this.showMenu = false;
     },
     formatTimestamp(timestamp) {
-      if (!timestamp) return 'N/A';
-      // Convert seconds to milliseconds (Firebase stores timestamps in seconds)
-      const date = new Date(timestamp * 1000);
-      return date.toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      });
+      // Accept timestamps in various formats:
+      // - milliseconds (>= 1e12)
+      // - seconds (>= 1e9 && < 1e12)
+      // - small counters/uptime (< 1e9) -> show as counter
+      if (timestamp === null || timestamp === undefined) return 'N/A';
+      const n = Number(timestamp);
+      if (!Number.isFinite(n)) return String(timestamp);
+      // milliseconds
+      if (n >= 1e12) {
+        return new Date(n).toLocaleString('en-US', {
+          year: 'numeric', month: 'short', day: 'numeric',
+          hour: '2-digit', minute: '2-digit', second: '2-digit',
+        });
+      }
+      // seconds
+      if (n >= 1e9) {
+        return new Date(n * 1000).toLocaleString('en-US', {
+          year: 'numeric', month: 'short', day: 'numeric',
+          hour: '2-digit', minute: '2-digit', second: '2-digit',
+        });
+      }
+      // small numbers likely device counters
+      return `${n} (device counter)`;
     },
     applyFilter() {
       if (this.selectedBinId === '') {
@@ -299,14 +311,41 @@ export default {
               const lastSeen = binData.lastSeen || 0;
               const wasConnected = now - lastSeen <= 60;
               const location = binData.location || 'Unknown';
-              
+
+              // Add latest connectivity snapshot based on lastSeen
               entries.push({
                 binId: key,
                 location: location,
-                timestamp: binData.lastSeen || 0,
+                timestamp: lastSeen || 0,
                 connected: binData.connected === true || wasConnected,
-                status: binData.status || 'unknown'
+                status: binData.status || 'unknown',
+                source: 'lastSeen'
               });
+
+              // If sensorData exists, add all sensor snapshots
+              if (binData.sensorData) {
+                Object.entries(binData.sensorData).forEach(([snapKey, snap]) => {
+                  // normalize timestamp like in BinManagement
+                  const raw = snap.timestamp;
+                  const n = Number(raw);
+                  let ts = null;
+                  if (Number.isFinite(n)) {
+                    if (n >= 1e12) ts = n; // ms
+                    else if (n >= 1e9) ts = n * 1000; // s -> ms
+                    else ts = n; // counter
+                  }
+                  entries.push({
+                    binId: key,
+                    location: location,
+                    timestamp: ts,
+                    connected: true,
+                    status: snap.status || 'snapshot',
+                    source: 'sensorData',
+                    snapshotId: snapKey,
+                    snapshot: snap,
+                  });
+                });
+              }
             });
             
             // Sort by timestamp descending (most recent first)
