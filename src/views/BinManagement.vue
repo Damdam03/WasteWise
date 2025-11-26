@@ -143,7 +143,6 @@
           <option>Laboratory Building 2</option>
           <option>CAH AVR</option>
           <option>COS Building</option>
-            showCounterHelp: false,
           <option>Laboratory Building 1</option>
           <option>Engineering Building</option>
           <option>Chapel</option>
@@ -247,9 +246,6 @@
           <div class="p-6">
             <div v-if="historyData === null" class="text-sm text-gray-500">Loading...</div>
             <div v-else-if="historyData.length === 0" class="text-sm text-gray-600">No history found for this bin.</div>
-            <div v-if="showCounterHelp" class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
-              Device counters are readings (uptime/counters) sent by ESP32 devices. They are not absolute timestamps. When available, the bin's lastSeen time is shown as an approximate reference.
-            </div>
             <div v-else class="space-y-3">
               <div v-for="(h, i) in historyData" :key="h.key" class="p-3 border rounded bg-gray-50">
                 <div class="flex justify-between text-sm text-gray-700">
@@ -257,12 +253,7 @@
                     <div class="font-semibold">Snapshot {{ i + 1 }}</div>
                     <div class="text-xs text-gray-500">ID: {{ h.key }}</div>
                   </div>
-              <div class="text-right text-xs text-gray-500 flex items-center justify-end space-x-2">
-                <div>{{ formatSnapshotTime(h, bin) }}</div>
-                <button title="What is this?" class="text-gray-400 hover:text-gray-600" @click.prevent="showCounterHelp = !showCounterHelp">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                </button>
-              </div>
+                  <div class="text-right text-xs text-gray-500">{{ h.timestamp ? new Date(h.timestamp).toLocaleString() : 'No timestamp' }}</div>
                 </div>
                 <div class="mt-2 text-sm text-gray-800">
                   <div>distance: {{ h.distance !== undefined ? h.distance : 'N/A' }}</div>
@@ -540,31 +531,10 @@ export default {
           return;
         }
         const arr = Object.entries(data).map(([k, v]) => {
-          // Normalize timestamp and tag its type so UI can decide how to present it.
-          // Possible timestamp types:
-          // - 'ms'      : already in milliseconds since epoch (>= 1e12)
-          // - 's'       : seconds since epoch (>= 1e9 and < 1e12) -> converted to ms
-          // - 'counter' : small integer probably a device counter or uptime (keep raw)
-          const raw = v.timestamp;
-          const n = Number(raw);
-          let timestamp = null;
-          let timestampType = null;
-          if (Number.isFinite(n)) {
-            if (n >= 1e12) {
-              // milliseconds
-              timestamp = n;
-              timestampType = 'ms';
-            } else if (n >= 1e9) {
-              // seconds -> convert to milliseconds
-              timestamp = n * 1000;
-              timestampType = 's';
-            } else {
-              // small values — likely a device counter/uptime
-              timestamp = n;
-              timestampType = 'counter';
-            }
-          }
-          return { key: k, ...v, timestamp, timestampType, rawTimestamp: raw };
+          // normalize timestamp: accept seconds or milliseconds
+          let ts = v.timestamp || null;
+          if (ts && ts < 1e12) ts = ts * 1000; // seconds -> ms
+          return { key: k, timestamp: ts, ...v };
         });
         arr.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         this.historyData = arr.slice(0, 50);
@@ -572,35 +542,6 @@ export default {
       onValue(ref, this._historyListener);
       // store off function for cleanup
       this._historyOff = () => { try { ref && ref.off && ref.off('value', this._historyListener); } catch(e) {} };
-    },
-    formatSnapshotTime(h) {
-      // h is the history entry that may contain timestamp, timestampType, rawTimestamp
-      if (!h || (h.timestamp === null || h.timestamp === undefined) ) {
-        // If there is a rawTimestamp but not parsed, show it as-is
-        if (h && h.rawTimestamp !== undefined && h.rawTimestamp !== null) return String(h.rawTimestamp);
-        return 'No timestamp';
-      }
-      // If timestampType indicates a counter, show a labeled value rather than a date
-      if (h.timestampType === 'counter') {
-        // If the parent bin has a lastSeen (epoch seconds) provide it as an approximate reference
-        let approx = '';
-        try {
-          if (bin && (bin.lastSeen || bin.lastSeen === 0)) {
-            const ls = Number(bin.lastSeen);
-            if (Number.isFinite(ls)) {
-              approx = ` — approx: ${new Date(ls * 1000).toLocaleString()}`;
-            }
-          }
-        } catch (e) {
-          approx = '';
-        }
-        return `${h.timestamp} (device counter)${approx}`;
-      }
-      try {
-        return new Date(h.timestamp).toLocaleString();
-      } catch (e) {
-        return String(h.rawTimestamp || h.timestamp);
-      }
     },
     closeHistory() {
       this.showHistoryModal = false;
