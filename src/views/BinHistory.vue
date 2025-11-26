@@ -90,8 +90,8 @@
 
     <!-- Main Content -->
     <div class="flex justify-center mt-8 px-6 pb-8">
-      <div class="w-full max-w-4xl">
-        <h1 class="text-3xl font-bold mb-6 text-gray-900">Bin Connectivity History</h1>
+      <div class="w-full max-w-6xl">
+        <h1 class="text-3xl font-bold mb-6 text-gray-900">Complete Bin History & Sensor Data</h1>
 
         <!-- Filter Section -->
         <div class="bg-white p-4 rounded-lg shadow-md mb-6">
@@ -112,22 +112,40 @@
                 <th class="px-4 py-3 text-left font-semibold">Bin ID</th>
                 <th class="px-4 py-3 text-left font-semibold">Location</th>
                 <th class="px-4 py-3 text-left font-semibold">Timestamp</th>
+                <th class="px-4 py-3 text-center font-semibold">Fill %</th>
+                <th class="px-4 py-3 text-center font-semibold">Distance (cm)</th>
                 <th class="px-4 py-3 text-left font-semibold">Status</th>
+                <th class="px-4 py-3 text-left font-semibold">Connection</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="(entry, index) in paginatedHistory" :key="index" class="border-b border-gray-200 hover:bg-indigo-50 transition-colors duration-200">
                 <td class="px-4 py-3 font-mono text-sm text-gray-700 truncate">{{ entry.binId }}</td>
                 <td class="px-4 py-3 text-gray-800 font-semibold">{{ entry.location }}</td>
-                <td class="px-4 py-3 text-gray-700">{{ formatTimestamp(entry.timestamp) }}</td>
+                <td class="px-4 py-3 text-gray-700 text-sm">{{ formatTimestamp(entry.timestamp) }}</td>
+                <td class="px-4 py-3 text-center font-semibold">
+                  <div class="flex items-center justify-center space-x-2">
+                    <span :class="['px-3 py-1 rounded font-bold text-white', getFillColor(entry.fillPercentage)]">
+                      {{ entry.fillPercentage !== undefined ? entry.fillPercentage + '%' : 'N/A' }}
+                    </span>
+                  </div>
+                </td>
+                <td class="px-4 py-3 text-center text-gray-700">
+                  {{ entry.distance !== undefined ? entry.distance.toFixed(2) : 'N/A' }}
+                </td>
                 <td class="px-4 py-3">
-                  <span :class="['font-semibold px-2 py-1 rounded', entry.connected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
-                    {{ entry.connected ? 'Connected' : 'Disconnected' }}
+                  <span :class="['font-semibold px-2 py-1 rounded text-xs', getStatusColor(entry.status)]">
+                    {{ entry.status || 'unknown' }}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <span :class="['font-semibold px-2 py-1 rounded text-xs', entry.connected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700']">
+                    {{ entry.connected ? '✓ Connected' : '✗ Disconnected' }}
                   </span>
                 </td>
               </tr>
               <tr v-if="filteredHistory.length === 0">
-                <td colspan="4" class="text-center py-6 text-gray-500">No connectivity history found.</td>
+                <td colspan="7" class="text-center py-6 text-gray-500">No history found.</td>
               </tr>
             </tbody>
           </table>
@@ -155,6 +173,28 @@
             </button>
           </div>
         </div>
+
+        <!-- Stats Card -->
+        <div class="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-sm text-gray-600">Total Readings</div>
+            <div class="text-3xl font-bold text-indigo-600">{{ filteredHistory.length }}</div>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-sm text-gray-600">Current Fill</div>
+            <div class="text-3xl font-bold" :class="getCurrentFillColor()">
+              {{ getCurrentFill() }}%
+            </div>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-sm text-gray-600">Status</div>
+            <div class="text-lg font-semibold capitalize">{{ getCurrentStatus() }}</div>
+          </div>
+          <div class="bg-white p-4 rounded-lg shadow">
+            <div class="text-sm text-gray-600">Last Update</div>
+            <div class="text-sm font-semibold">{{ getLastUpdate() }}</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -168,14 +208,54 @@
       leave-to-class="opacity-0"
     >
       <div v-if="showHelp" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white p-6 rounded-lg shadow-xl max-w-md">
-          <h2 class="text-xl font-bold mb-4 text-gray-900">Help - Bin Connectivity History</h2>
-          <p class="text-sm text-gray-700 leading-relaxed mb-4">
-            This page displays the real-time connectivity history of waste bins across campus. You can filter by specific bins to see their connection status changes over time.
-          </p>
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-2xl max-h-96 overflow-y-auto">
+          <h2 class="text-xl font-bold mb-4 text-gray-900">📊 Complete Bin History Guide</h2>
+          
+          <div class="space-y-4 text-sm text-gray-700">
+            <!-- Overview -->
+            <div>
+              <h3 class="font-bold text-gray-900 mb-2">📋 What You See Here</h3>
+              <p class="mb-2">This page shows comprehensive historical data for all bins including:</p>
+              <ul class="list-disc list-inside space-y-1 ml-2">
+                <li><strong>Fill Level (%)</strong> - Waste level from 0-100%</li>
+                <li><strong>Distance (cm)</strong> - Raw sensor reading from ultrasonic sensor</li>
+                <li><strong>Status</strong> - empty, medium, or full</li>
+                <li><strong>Connection</strong> - Device connectivity status</li>
+                <li><strong>Timestamp</strong> - Exact date/time of reading with seconds precision</li>
+              </ul>
+            </div>
+
+            <!-- Color Coding -->
+            <div>
+              <h3 class="font-bold text-gray-900 mb-2">🎨 Color Coding</h3>
+              <ul class="space-y-1 ml-2">
+                <li><span class="inline-block w-3 h-3 bg-green-600 rounded mr-2"></span>Green 0-49%: Empty bin</li>
+                <li><span class="inline-block w-3 h-3 bg-yellow-500 rounded mr-2"></span>Yellow 50-89%: Medium fill</li>
+                <li><span class="inline-block w-3 h-3 bg-red-600 rounded mr-2"></span>Red 90-100%: Full/Alert</li>
+              </ul>
+            </div>
+
+            <!-- Stats Card -->
+            <div>
+              <h3 class="font-bold text-gray-900 mb-2">📈 Stats Card (Bottom)</h3>
+              <ul class="list-disc list-inside space-y-1 ml-2">
+                <li><strong>Total Readings</strong> - Number of sensor readings recorded</li>
+                <li><strong>Current Fill</strong> - Latest fill percentage</li>
+                <li><strong>Status</strong> - Current bin status</li>
+                <li><strong>Last Update</strong> - When the bin last reported data</li>
+              </ul>
+            </div>
+
+            <!-- Filtering -->
+            <div>
+              <h3 class="font-bold text-gray-900 mb-2">🔍 Filter & Search</h3>
+              <p>Use the dropdown to filter by specific bin. Shows all sensor readings and connectivity changes for that bin in chronological order (newest first).</p>
+            </div>
+          </div>
+
           <button 
             @click="showHelp = false"
-            class="w-full px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors duration-200 font-semibold"
+            class="w-full mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors duration-200 font-semibold"
           >
             Close
           </button>
@@ -187,7 +267,7 @@
 
 <script>
 import { db } from '@/services/firebase';
-import { ref as dbRef, onValue, off, get, set } from 'firebase/database';
+import { ref as dbRef, onValue, off } from 'firebase/database';
 
 export default {
   name: 'BinHistory',
@@ -239,29 +319,51 @@ export default {
       this.showMenu = false;
     },
     formatTimestamp(timestamp) {
-      // Accept timestamps in various formats:
-      // - milliseconds (>= 1e12)
-      // - seconds (>= 1e9 && < 1e12)
-      // - small counters/uptime (< 1e9) -> show as counter
-      if (timestamp === null || timestamp === undefined) return 'N/A';
-      const n = Number(timestamp);
-      if (!Number.isFinite(n)) return String(timestamp);
-      // milliseconds
-      if (n >= 1e12) {
-        return new Date(n).toLocaleString('en-US', {
-          year: 'numeric', month: 'short', day: 'numeric',
-          hour: '2-digit', minute: '2-digit', second: '2-digit',
-        });
+      if (!timestamp) return 'N/A';
+      // Convert seconds to milliseconds (Firebase stores timestamps in seconds)
+      const date = new Date(timestamp * 1000);
+      return date.toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+      });
+    },
+    getFillColor(fillPercentage) {
+      if (fillPercentage === undefined || fillPercentage === null) return 'bg-gray-400';
+      if (fillPercentage >= 90) return 'bg-red-600';
+      if (fillPercentage >= 50) return 'bg-yellow-500';
+      return 'bg-green-600';
+    },
+    getStatusColor(status) {
+      switch (status) {
+        case 'full': return 'bg-red-100 text-red-700';
+        case 'medium': return 'bg-yellow-100 text-yellow-700';
+        case 'empty': return 'bg-green-100 text-green-700';
+        default: return 'bg-gray-100 text-gray-700';
       }
-      // seconds
-      if (n >= 1e9) {
-        return new Date(n * 1000).toLocaleString('en-US', {
-          year: 'numeric', month: 'short', day: 'numeric',
-          hour: '2-digit', minute: '2-digit', second: '2-digit',
-        });
-      }
-      // small numbers likely device counters
-      return `${n} (device counter)`;
+    },
+    getCurrentFill() {
+      if (this.filteredHistory.length === 0) return 'N/A';
+      const latest = this.filteredHistory[0];
+      return latest.fillPercentage !== undefined ? Math.round(latest.fillPercentage) : 'N/A';
+    },
+    getCurrentFillColor() {
+      if (this.filteredHistory.length === 0) return 'text-gray-600';
+      const latest = this.filteredHistory[0];
+      return this.getFillColor(latest.fillPercentage).replace('bg-', 'text-');
+    },
+    getCurrentStatus() {
+      if (this.filteredHistory.length === 0) return 'unknown';
+      const latest = this.filteredHistory[0];
+      return latest.status || 'unknown';
+    },
+    getLastUpdate() {
+      if (this.filteredHistory.length === 0) return 'Never';
+      const latest = this.filteredHistory[0];
+      return this.formatTimestamp(latest.timestamp);
     },
     applyFilter() {
       if (this.selectedBinId === '') {
@@ -298,97 +400,58 @@ export default {
     },
     loadConnectivityHistory() {
       try {
-        // Load current bin connection status from bins data
+        // Load sensor data history from all bins
         const binsRef = dbRef(db, 'bins');
         onValue(binsRef, (snapshot) => {
           if (snapshot.exists()) {
             const binsData = snapshot.val();
             const now = Math.floor(Date.now() / 1000);
-            
-            // Create history entries from current bin status
             const entries = [];
-            Object.entries(binsData).forEach(([key, binData]) => {
-              const lastSeen = binData.lastSeen || 0;
-              const wasConnected = now - lastSeen <= 60;
-              const location = binData.location || 'Unknown';
 
-              // Add latest connectivity snapshot based on lastSeen
-              entries.push({
-                binId: key,
-                location: location,
-                timestamp: lastSeen || 0,
-                connected: binData.connected === true || wasConnected,
-                status: binData.status || 'unknown',
-                source: 'lastSeen'
+            // For each bin, load its sensorData history
+            Object.entries(binsData).forEach(([binKey, binData]) => {
+              const location = binData.location || 'Unknown';
+              const sensorData = binData.sensorData || {};
+              
+              // Convert sensorData to array of entries
+              Object.entries(sensorData).forEach(([deviceId, readings]) => {
+                // readings can have multiple timestamps
+                if (readings && typeof readings === 'object') {
+                  // If readings has timestamp property, it's a single reading
+                  if (readings.timestamp) {
+                    entries.push({
+                      binId: binKey,
+                      location: location,
+                      timestamp: readings.timestamp,
+                      distance: readings.distance,
+                      fillPercentage: readings.fillPercentage,
+                      status: readings.status || 'unknown',
+                      connected: true,
+                      deviceId: readings.deviceId || deviceId,
+                      type: 'sensor'
+                    });
+                  }
+                }
               });
 
-              // If sensorData exists, add all sensor snapshots
-              if (binData.sensorData) {
-                Object.entries(binData.sensorData).forEach(([snapKey, snap]) => {
-                  // normalize timestamp like in BinManagement
-                  const raw = snap.timestamp;
-                  const n = Number(raw);
-                  let ts = null;
-                  if (Number.isFinite(n)) {
-                    if (n >= 1e12) ts = n; // ms
-                    else if (n >= 1e9) ts = n * 1000; // s -> ms
-                    else ts = n; // counter
-                  }
-                  // Archive snapshot into central history path if not already stored
-                  try {
-                    const historyRef = dbRef(db, `binHistory/${key}/${snapKey}`);
-                    // check existence then write if missing
-                    get(historyRef).then((hSnap) => {
-                      if (!hSnap.exists()) {
-                        const payload = Object.assign({}, snap, { timestamp: ts, archivedAt: Date.now() });
-                        set(historyRef, payload).catch((err) => {
-                          // log but do not break UI
-                          // eslint-disable-next-line no-console
-                          console.warn('[BinHistory] failed to archive snapshot', key, snapKey, err && err.message);
-                        });
-                      }
-                    }).catch((err) => {
-                      // eslint-disable-next-line no-console
-                      console.warn('[BinHistory] failed to check archive existence', err && err.message);
-                    });
-                  } catch (e) {
-                    // ignore archival errors
-                  }
-                  entries.push({
-                    binId: key,
-                    location: location,
-                    timestamp: ts,
-                    connected: true,
-                    status: snap.status || 'snapshot',
-                    source: 'sensorData',
-                    snapshotId: snapKey,
-                    snapshot: snap,
-                  });
-                });
-              }
+              // Also add connectivity status
+              const lastSeen = binData.lastSeen || 0;
+              const wasConnected = now - lastSeen <= 60;
+              entries.push({
+                binId: binKey,
+                location: location,
+                timestamp: lastSeen,
+                distance: undefined,
+                fillPercentage: undefined,
+                status: binData.status || 'unknown',
+                connected: binData.connected === true || wasConnected,
+                type: 'connectivity'
+              });
             });
-            
+
             // Sort by timestamp descending (most recent first)
             this.allHistoryEntries = entries.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
             this.applyFilter();
-          }
-        });
-
-        // Also listen to connectionPing for real-time connection updates
-        const pingRef = dbRef(db, 'connectionPing');
-        onValue(pingRef, (snapshot) => {
-          if (snapshot.exists()) {
-            const pingData = snapshot.val();
-            console.log('[BinHistory] Connection ping data received:', pingData);
-            
-            // Parse device IDs and create entries
-            Object.entries(pingData).forEach(([deviceKey, pingData]) => {
-              // Extract device ID from key (e.g., "esp32_rest_132135346616224" -> "132135346616224")
-              const deviceMatch = deviceKey.match(/esp32_rest_(\d+)$/);
-              if (deviceMatch) {
-                console.log('[BinHistory] Device ping updated:', deviceMatch[1]);
-              }
-            });
           }
         });
       } catch (error) {
