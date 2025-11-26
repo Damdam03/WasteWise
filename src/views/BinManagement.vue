@@ -531,9 +531,16 @@ export default {
           return;
         }
         const arr = Object.entries(data).map(([k, v]) => {
-          // normalize timestamp: accept seconds or milliseconds
+          // Timestamp from ESP32 is in seconds (Unix timestamp)
           let ts = v.timestamp || null;
-          if (ts && ts < 1e12) ts = ts * 1000; // seconds -> ms
+          // Convert seconds to milliseconds for JavaScript Date
+          if (ts) {
+            if (ts < 1e12) {
+              // Timestamp is in seconds, convert to milliseconds
+              ts = ts * 1000;
+            }
+            // If ts >= 1e12, it's already in milliseconds (shouldn't happen with proper ESP32)
+          }
           return { key: k, timestamp: ts, ...v };
         });
         arr.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
