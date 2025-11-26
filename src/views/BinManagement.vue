@@ -253,8 +253,7 @@
                     <div class="font-semibold">Snapshot {{ i + 1 }}</div>
                     <div class="text-xs text-gray-500">ID: {{ h.key }}</div>
                   </div>
-                  <div class="text-right text-xs text-gray-500">{{ h.timestamp ? new Date(h.timestamp * 1000).toLocaleString() : 'No timestamp' }}</div>
-                    <div class="text-right text-xs text-gray-500">{{ h.timestamp ? new Date(h.timestamp).toLocaleString() : 'No timestamp' }}</div>
+              <div class="text-right text-xs text-gray-500">{{ formatSnapshotTime(h) }}</div>
                 </div>
                 <div class="mt-2 text-sm text-gray-800">
                   <div>distance: {{ h.distance !== undefined ? h.distance : 'N/A' }}</div>
@@ -532,11 +531,31 @@ export default {
           return;
         }
         const arr = Object.entries(data).map(([k, v]) => {
-          // normalize timestamp: accept seconds or milliseconds and keep final value
-          let ts = v.timestamp || null;
-          if (ts && ts < 1e12) ts = ts * 1000; // seconds -> ms
-          // spread original values first, then set the normalized timestamp so it isn't overwritten
-          return { key: k, ...v, timestamp: ts };
+          // Normalize timestamp and tag its type so UI can decide how to present it.
+          // Possible timestamp types:
+          // - 'ms'      : already in milliseconds since epoch (>= 1e12)
+          // - 's'       : seconds since epoch (>= 1e9 and < 1e12) -> converted to ms
+          // - 'counter' : small integer probably a device counter or uptime (keep raw)
+          const raw = v.timestamp;
+          const n = Number(raw);
+          let timestamp = null;
+          let timestampType = null;
+          if (Number.isFinite(n)) {
+            if (n >= 1e12) {
+              // milliseconds
+              timestamp = n;
+              timestampType = 'ms';
+            } else if (n >= 1e9) {
+              // seconds -> convert to milliseconds
+              timestamp = n * 1000;
+              timestampType = 's';
+            } else {
+              // small values — likely a device counter/uptime
+              timestamp = n;
+              timestampType = 'counter';
+            }
+          }
+          return { key: k, ...v, timestamp, timestampType, rawTimestamp: raw };
         });
         arr.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         this.historyData = arr.slice(0, 50);
@@ -544,6 +563,23 @@ export default {
       onValue(ref, this._historyListener);
       // store off function for cleanup
       this._historyOff = () => { try { ref && ref.off && ref.off('value', this._historyListener); } catch(e) {} };
+    },
+    formatSnapshotTime(h) {
+      // h is the history entry that may contain timestamp, timestampType, rawTimestamp
+      if (!h || (h.timestamp === null || h.timestamp === undefined) ) {
+        // If there is a rawTimestamp but not parsed, show it as-is
+        if (h && h.rawTimestamp !== undefined && h.rawTimestamp !== null) return String(h.rawTimestamp);
+        return 'No timestamp';
+      }
+      // If timestampType indicates a counter, show a labeled value rather than a date
+      if (h.timestampType === 'counter') {
+        return `${h.timestamp} (device counter)`;
+      }
+      try {
+        return new Date(h.timestamp).toLocaleString();
+      } catch (e) {
+        return String(h.rawTimestamp || h.timestamp);
+      }
     },
     closeHistory() {
       this.showHistoryModal = false;
