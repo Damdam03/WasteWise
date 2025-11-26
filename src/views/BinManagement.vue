@@ -253,7 +253,8 @@
                     <div class="font-semibold">Snapshot {{ i + 1 }}</div>
                     <div class="text-xs text-gray-500">ID: {{ h.key }}</div>
                   </div>
-                  <div class="text-right text-xs text-gray-500">{{ h.timestamp ? new Date(h.timestamp).toLocaleString() : 'No timestamp' }}</div>
+                  <div class="text-right text-xs text-gray-500">{{ h.timestamp ? new Date(h.timestamp * 1000).toLocaleString() : 'No timestamp' }}</div>
+                    <div class="text-right text-xs text-gray-500">{{ h.timestamp ? new Date(h.timestamp).toLocaleString() : 'No timestamp' }}</div>
                 </div>
                 <div class="mt-2 text-sm text-gray-800">
                   <div>distance: {{ h.distance !== undefined ? h.distance : 'N/A' }}</div>
@@ -531,10 +532,11 @@ export default {
           return;
         }
         const arr = Object.entries(data).map(([k, v]) => {
-          // normalize timestamp: accept seconds or milliseconds
+          // normalize timestamp: accept seconds or milliseconds and keep final value
           let ts = v.timestamp || null;
           if (ts && ts < 1e12) ts = ts * 1000; // seconds -> ms
-          return { key: k, timestamp: ts, ...v };
+          // spread original values first, then set the normalized timestamp so it isn't overwritten
+          return { key: k, ...v, timestamp: ts };
         });
         arr.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
         this.historyData = arr.slice(0, 50);
@@ -613,3 +615,4 @@ table {
   border-collapse: collapse;
 }
 </style>
+  
